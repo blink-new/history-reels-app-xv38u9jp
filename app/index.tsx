@@ -167,153 +167,162 @@ const EventCard = ({ event, savedEvents, setSavedEvents }: {
         <View style={{
           flex: 1,
           justifyContent: 'flex-start',
-          padding: 24,
-          paddingTop: 80,
-          paddingRight: 100, // Extra space for action buttons
           paddingBottom: 200, // Extra space at bottom to prevent overlap
         }}>
-          {/* Category Badge */}
+          {/* Full-width content section */}
           <View style={{
-            backgroundColor: '#6366f1',
-            paddingHorizontal: 16,
-            paddingVertical: 8,
-            borderRadius: 24,
-            alignSelf: 'flex-start',
-            marginBottom: 12,
-            shadowColor: '#000',
-            shadowOffset: { width: 0, height: 2 },
-            shadowOpacity: 0.3,
-            shadowRadius: 4,
+            padding: 24,
+            paddingTop: 80,
           }}>
+            {/* Category Badge */}
+            <View style={{
+              backgroundColor: '#6366f1',
+              paddingHorizontal: 16,
+              paddingVertical: 8,
+              borderRadius: 24,
+              alignSelf: 'flex-start',
+              marginBottom: 12,
+              shadowColor: '#000',
+              shadowOffset: { width: 0, height: 2 },
+              shadowOpacity: 0.3,
+              shadowRadius: 4,
+            }}>
+              <Text style={{
+                color: 'white',
+                fontSize: 12,
+                fontWeight: '700',
+                textTransform: 'uppercase',
+                letterSpacing: 0.5,
+                ...noSelectStyle,
+              }}>
+                {event.category}
+              </Text>
+            </View>
+
+            {/* Title */}
             <Text style={{
+              fontSize: 28,
+              fontWeight: '800',
               color: 'white',
-              fontSize: 12,
-              fontWeight: '700',
-              textTransform: 'uppercase',
-              letterSpacing: 0.5,
+              marginBottom: 6,
+              textShadowColor: 'rgba(0, 0, 0, 0.8)',
+              textShadowOffset: { width: 0, height: 2 },
+              textShadowRadius: 6,
+              lineHeight: 34,
               ...noSelectStyle,
             }}>
-              {event.category}
+              {event.title}
             </Text>
-          </View>
 
-          {/* Title */}
-          <Text style={{
-            fontSize: 28,
-            fontWeight: '800',
-            color: 'white',
-            marginBottom: 6,
-            textShadowColor: 'rgba(0, 0, 0, 0.8)',
-            textShadowOffset: { width: 0, height: 2 },
-            textShadowRadius: 6,
-            lineHeight: 34,
-            ...noSelectStyle,
-          }}>
-            {event.title}
-          </Text>
+            {/* Date & Location */}
+            <View style={{ 
+              flexDirection: 'row', 
+              alignItems: 'center', 
+              marginBottom: 12,
+            }}>
+              <Text style={{
+                fontSize: 15,
+                color: '#a78bfa',
+                fontWeight: '600',
+                textShadowColor: 'rgba(0, 0, 0, 0.8)',
+                textShadowOffset: { width: 0, height: 1 },
+                textShadowRadius: 2,
+                ...noSelectStyle,
+              }}>
+                {event.date}
+              </Text>
+              <Text style={{
+                fontSize: 15,
+                color: '#a78bfa',
+                fontWeight: '600',
+                marginLeft: 8,
+                ...noSelectStyle,
+              }}>
+                • {event.location}
+              </Text>
+            </View>
 
-          {/* Date & Location */}
-          <View style={{ 
-            flexDirection: 'row', 
-            alignItems: 'center', 
-            marginBottom: 12,
-          }}>
+            {/* Description */}
             <Text style={{
-              fontSize: 15,
-              color: '#a78bfa',
-              fontWeight: '600',
+              fontSize: 16,
+              color: 'white',
+              lineHeight: 24,
+              marginBottom: 12,
               textShadowColor: 'rgba(0, 0, 0, 0.8)',
               textShadowOffset: { width: 0, height: 1 },
               textShadowRadius: 2,
-              ...noSelectStyle,
-            }}>
-              {event.date}
-            </Text>
-            <Text style={{
-              fontSize: 15,
-              color: '#a78bfa',
-              fontWeight: '600',
-              marginLeft: 8,
-              ...noSelectStyle,
-            }}>
-              • {event.location}
-            </Text>
-          </View>
-
-          {/* Description */}
-          <Text style={{
-            fontSize: 16,
-            color: 'white',
-            lineHeight: 24,
-            marginBottom: 12,
-            textShadowColor: 'rgba(0, 0, 0, 0.8)',
-            textShadowOffset: { width: 0, height: 1 },
-            textShadowRadius: 2,
-            fontWeight: '400',
-            ...noSelectStyle,
-          }}>
-            {event.description}
-          </Text>
-
-          {/* Fun Fact */}
-          <View style={{
-            backgroundColor: 'rgba(99, 102, 241, 0.9)',
-            padding: 12,
-            borderRadius: 16,
-            marginBottom: 8,
-            shadowColor: '#000',
-            shadowOffset: { width: 0, height: 4 },
-            shadowOpacity: 0.3,
-            shadowRadius: 8,
-          }}>
-            <Text style={{
-              fontSize: 13,
-              color: 'white',
-              fontWeight: '700',
-              marginBottom: 4,
-              ...noSelectStyle,
-            }}>
-              💡 Fun Fact
-            </Text>
-            <Text style={{
-              fontSize: 14,
-              color: 'white',
-              lineHeight: 20,
               fontWeight: '400',
               ...noSelectStyle,
             }}>
-              {event.funFact}
+              {event.description}
             </Text>
           </View>
 
-          {/* Impact */}
+          {/* Left-shifted boxes section to avoid action buttons */}
           <View style={{
-            backgroundColor: 'rgba(16, 185, 129, 0.9)',
-            padding: 12,
-            borderRadius: 16,
-            shadowColor: '#000',
-            shadowOffset: { width: 0, height: 4 },
-            shadowOpacity: 0.3,
-            shadowRadius: 8,
+            paddingLeft: 24,
+            paddingRight: 100, // Extra space for action buttons
           }}>
-            <Text style={{
-              fontSize: 13,
-              color: 'white',
-              fontWeight: '700',
-              marginBottom: 4,
-              ...noSelectStyle,
+            {/* Fun Fact */}
+            <View style={{
+              backgroundColor: 'rgba(99, 102, 241, 0.9)',
+              padding: 12,
+              borderRadius: 16,
+              marginBottom: 8,
+              shadowColor: '#000',
+              shadowOffset: { width: 0, height: 4 },
+              shadowOpacity: 0.3,
+              shadowRadius: 8,
             }}>
-              🌍 Historical Impact
-            </Text>
-            <Text style={{
-              fontSize: 14,
-              color: 'white',
-              lineHeight: 20,
-              fontWeight: '400',
-              ...noSelectStyle,
+              <Text style={{
+                fontSize: 13,
+                color: 'white',
+                fontWeight: '700',
+                marginBottom: 4,
+                ...noSelectStyle,
+              }}>
+                💡 Fun Fact
+              </Text>
+              <Text style={{
+                fontSize: 14,
+                color: 'white',
+                lineHeight: 20,
+                fontWeight: '400',
+                ...noSelectStyle,
+              }}>
+                {event.funFact}
+              </Text>
+            </View>
+
+            {/* Impact */}
+            <View style={{
+              backgroundColor: 'rgba(16, 185, 129, 0.9)',
+              padding: 12,
+              borderRadius: 16,
+              shadowColor: '#000',
+              shadowOffset: { width: 0, height: 4 },
+              shadowOpacity: 0.3,
+              shadowRadius: 8,
             }}>
-              {event.impact}
-            </Text>
+              <Text style={{
+                fontSize: 13,
+                color: 'white',
+                fontWeight: '700',
+                marginBottom: 4,
+                ...noSelectStyle,
+              }}>
+                🌍 Historical Impact
+              </Text>
+              <Text style={{
+                fontSize: 14,
+                color: 'white',
+                lineHeight: 20,
+                fontWeight: '400',
+                ...noSelectStyle,
+              }}>
+                {event.impact}
+              </Text>
+            </View>
           </View>
         </View>
 
