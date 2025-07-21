@@ -8,10 +8,12 @@ import {
   TouchableOpacity,
   Share,
   Alert,
-  FlatList,
+  ScrollView,
   Platform,
   ActivityIndicator,
+  FlatList,
 } from 'react-native';
+// Removed gesture handler imports for now to fix blank screen issue
 
 const { height: SCREEN_HEIGHT, width: SCREEN_WIDTH } = Dimensions.get('window');
 
@@ -163,16 +165,19 @@ const EventCard = ({ event, savedEvents, setSavedEvents }: {
           backgroundColor: 'rgba(0, 0, 0, 0.4)',
         }} />
 
-        {/* Content */}
-        <View style={{
-          flex: 1,
-          justifyContent: 'flex-start',
-          paddingBottom: 200, // Extra space at bottom to prevent overlap
-        }}>
+        {/* Content - Scrollable to prevent text cutoff */}
+        <ScrollView 
+          style={{ flex: 1 }}
+          contentContainerStyle={{
+            paddingBottom: 250, // Extra space at bottom to prevent overlap with tabs
+          }}
+          showsVerticalScrollIndicator={false}
+        >
           {/* Full-width content section */}
           <View style={{
-            padding: 24,
+            paddingHorizontal: 24,
             paddingTop: 80,
+            paddingRight: 24, // Full width for main content
           }}>
             {/* Category Badge */}
             <View style={{
@@ -247,7 +252,7 @@ const EventCard = ({ event, savedEvents, setSavedEvents }: {
               fontSize: 16,
               color: 'white',
               lineHeight: 24,
-              marginBottom: 12,
+              marginBottom: 16,
               textShadowColor: 'rgba(0, 0, 0, 0.8)',
               textShadowOffset: { width: 0, height: 1 },
               textShadowRadius: 2,
@@ -266,9 +271,9 @@ const EventCard = ({ event, savedEvents, setSavedEvents }: {
             {/* Fun Fact */}
             <View style={{
               backgroundColor: 'rgba(99, 102, 241, 0.9)',
-              padding: 12,
+              padding: 14,
               borderRadius: 16,
-              marginBottom: 8,
+              marginBottom: 12,
               shadowColor: '#000',
               shadowOffset: { width: 0, height: 4 },
               shadowOpacity: 0.3,
@@ -278,7 +283,7 @@ const EventCard = ({ event, savedEvents, setSavedEvents }: {
                 fontSize: 13,
                 color: 'white',
                 fontWeight: '700',
-                marginBottom: 4,
+                marginBottom: 6,
                 ...noSelectStyle,
               }}>
                 💡 Fun Fact
@@ -297,8 +302,9 @@ const EventCard = ({ event, savedEvents, setSavedEvents }: {
             {/* Impact */}
             <View style={{
               backgroundColor: 'rgba(16, 185, 129, 0.9)',
-              padding: 12,
+              padding: 14,
               borderRadius: 16,
+              marginBottom: 20,
               shadowColor: '#000',
               shadowOffset: { width: 0, height: 4 },
               shadowOpacity: 0.3,
@@ -308,7 +314,7 @@ const EventCard = ({ event, savedEvents, setSavedEvents }: {
                 fontSize: 13,
                 color: 'white',
                 fontWeight: '700',
-                marginBottom: 4,
+                marginBottom: 6,
                 ...noSelectStyle,
               }}>
                 🌍 Historical Impact
@@ -324,7 +330,7 @@ const EventCard = ({ event, savedEvents, setSavedEvents }: {
               </Text>
             </View>
           </View>
-        </View>
+        </ScrollView>
 
         {/* Action Buttons - Right Side */}
         <View style={{
@@ -379,11 +385,11 @@ const EventCard = ({ event, savedEvents, setSavedEvents }: {
   );
 };
 
-// Home Feed Component - SIMPLE FLATLIST WITH SNAP!
+// Home Feed Component - SIMPLE FLATLIST WITH PROPER SNAP BEHAVIOR
 const HomeFeed = ({ savedEvents, setSavedEvents }: { savedEvents: Set<number>, setSavedEvents: (events: Set<number>) => void }) => {
   const [events, setEvents] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
-  const [loadingMore, setLoadingMore] = useState(false);
+  const [currentIndex, setCurrentIndex] = useState(0);
 
   // Load initial events
   useEffect(() => {
@@ -395,7 +401,7 @@ const HomeFeed = ({ savedEvents, setSavedEvents }: { savedEvents: Set<number>, s
     try {
       // Simulate loading time for dramatic effect
       await new Promise(resolve => setTimeout(resolve, 1500));
-      const initialEvents = generateRareHistoricalEvents(0, 25);
+      const initialEvents = generateRareHistoricalEvents(0, 50); // Load more initially
       setEvents(initialEvents);
     } catch (error) {
       console.error('Error loading initial events:', error);
@@ -404,20 +410,27 @@ const HomeFeed = ({ savedEvents, setSavedEvents }: { savedEvents: Set<number>, s
     }
   };
 
-  // Load more events when reaching the end - TRULY INFINITE!
+  // Load more events when needed
   const loadMoreEvents = async () => {
-    if (loadingMore) return;
-    
-    setLoadingMore(true);
     try {
-      await new Promise(resolve => setTimeout(resolve, 1000));
       const moreEvents = generateRareHistoricalEvents(events.length, 25);
       setEvents(prevEvents => [...prevEvents, ...moreEvents]);
     } catch (error) {
       console.error('Error loading more events:', error);
-    } finally {
-      setLoadingMore(false);
     }
+  };
+
+  // Check if we need to load more events
+  useEffect(() => {
+    if (currentIndex >= events.length - 5) {
+      loadMoreEvents();
+    }
+  }, [currentIndex, events.length]);
+
+  const handleScroll = (event: any) => {
+    const offsetY = event.nativeEvent.contentOffset.y;
+    const index = Math.round(offsetY / SCREEN_HEIGHT);
+    setCurrentIndex(index);
   };
 
   if (loading) {
@@ -463,38 +476,17 @@ const HomeFeed = ({ savedEvents, setSavedEvents }: { savedEvents: Set<number>, s
         snapToInterval={SCREEN_HEIGHT}
         snapToAlignment="start"
         decelerationRate="fast"
+        bounces={false}
+        onScroll={handleScroll}
+        scrollEventThrottle={16}
         getItemLayout={(data, index) => ({
           length: SCREEN_HEIGHT,
           offset: SCREEN_HEIGHT * index,
           index,
         })}
         removeClippedSubviews={false}
-        scrollEventThrottle={16}
         disableIntervalMomentum={true}
-        bounces={false}
-        onEndReached={loadMoreEvents}
-        onEndReachedThreshold={0.5}
-        ListFooterComponent={
-          loadingMore ? (
-            <View style={{
-              height: SCREEN_HEIGHT,
-              backgroundColor: '#000',
-              justifyContent: 'center',
-              alignItems: 'center',
-            }}>
-              <ActivityIndicator size="large" color="#ff6b35" />
-              <Text style={{ 
-                color: 'white', 
-                fontSize: 16, 
-                marginTop: 16,
-                fontWeight: '600',
-                ...noSelectStyle,
-              }}>
-                Discovering more ancient mysteries...
-              </Text>
-            </View>
-          ) : null
-        }
+        style={{ flex: 1 }}
       />
     </View>
   );
