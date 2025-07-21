@@ -458,11 +458,20 @@ const HomeFeed = ({ savedEvents, setSavedEvents }: { savedEvents: Set<number>, s
             setSavedEvents={setSavedEvents} 
           />
         )}
-        pagingEnabled
+        pagingEnabled={true}
         showsVerticalScrollIndicator={false}
         snapToInterval={SCREEN_HEIGHT}
         snapToAlignment="start"
         decelerationRate="fast"
+        getItemLayout={(data, index) => ({
+          length: SCREEN_HEIGHT,
+          offset: SCREEN_HEIGHT * index,
+          index,
+        })}
+        removeClippedSubviews={false}
+        scrollEventThrottle={16}
+        disableIntervalMomentum={true}
+        bounces={false}
         onEndReached={loadMoreEvents}
         onEndReachedThreshold={0.5}
         ListFooterComponent={
