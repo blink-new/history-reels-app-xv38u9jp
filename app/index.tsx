@@ -165,20 +165,16 @@ const EventCard = ({ event, savedEvents, setSavedEvents }: {
           backgroundColor: 'rgba(0, 0, 0, 0.4)',
         }} />
 
-        {/* Content - Scrollable to prevent text cutoff */}
-        <ScrollView 
-          style={{ flex: 1 }}
-          contentContainerStyle={{
-            paddingBottom: 250, // Extra space at bottom to prevent overlap with tabs
-          }}
-          showsVerticalScrollIndicator={false}
-        >
-          {/* Full-width content section */}
-          <View style={{
-            paddingHorizontal: 24,
-            paddingTop: 80,
-            paddingRight: 24, // Full width for main content
-          }}>
+        {/* Content - Fixed layout without scrolling */}
+        <View style={{ 
+          flex: 1,
+          paddingHorizontal: 24,
+          paddingTop: 80,
+          paddingBottom: 180, // Space for tabs and action buttons
+          justifyContent: 'space-between',
+        }}>
+          {/* Top Section - Title and Description */}
+          <View style={{ flex: 1 }}>
             {/* Category Badge */}
             <View style={{
               backgroundColor: '#6366f1',
@@ -206,14 +202,14 @@ const EventCard = ({ event, savedEvents, setSavedEvents }: {
 
             {/* Title */}
             <Text style={{
-              fontSize: 28,
+              fontSize: 26,
               fontWeight: '800',
               color: 'white',
               marginBottom: 6,
               textShadowColor: 'rgba(0, 0, 0, 0.8)',
               textShadowOffset: { width: 0, height: 2 },
               textShadowRadius: 6,
-              lineHeight: 34,
+              lineHeight: 32,
               ...noSelectStyle,
             }}>
               {event.title}
@@ -223,7 +219,7 @@ const EventCard = ({ event, savedEvents, setSavedEvents }: {
             <View style={{ 
               flexDirection: 'row', 
               alignItems: 'center', 
-              marginBottom: 12,
+              marginBottom: 16,
             }}>
               <Text style={{
                 fontSize: 15,
@@ -249,29 +245,28 @@ const EventCard = ({ event, savedEvents, setSavedEvents }: {
 
             {/* Description */}
             <Text style={{
-              fontSize: 16,
+              fontSize: 15,
               color: 'white',
-              lineHeight: 24,
-              marginBottom: 16,
+              lineHeight: 22,
+              marginBottom: 20,
               textShadowColor: 'rgba(0, 0, 0, 0.8)',
               textShadowOffset: { width: 0, height: 1 },
               textShadowRadius: 2,
               fontWeight: '400',
               ...noSelectStyle,
-            }}>
+            }} numberOfLines={6}>
               {event.description}
             </Text>
           </View>
 
-          {/* Left-shifted boxes section to avoid action buttons */}
+          {/* Bottom Section - Fun Fact and Impact (avoiding action buttons) */}
           <View style={{
-            paddingLeft: 24,
-            paddingRight: 100, // Extra space for action buttons
+            paddingRight: 80, // Space for action buttons
           }}>
             {/* Fun Fact */}
             <View style={{
               backgroundColor: 'rgba(99, 102, 241, 0.9)',
-              padding: 14,
+              padding: 12,
               borderRadius: 16,
               marginBottom: 12,
               shadowColor: '#000',
@@ -280,21 +275,21 @@ const EventCard = ({ event, savedEvents, setSavedEvents }: {
               shadowRadius: 8,
             }}>
               <Text style={{
-                fontSize: 13,
+                fontSize: 12,
                 color: 'white',
                 fontWeight: '700',
-                marginBottom: 6,
+                marginBottom: 4,
                 ...noSelectStyle,
               }}>
                 💡 Fun Fact
               </Text>
               <Text style={{
-                fontSize: 14,
+                fontSize: 13,
                 color: 'white',
-                lineHeight: 20,
+                lineHeight: 18,
                 fontWeight: '400',
                 ...noSelectStyle,
-              }}>
+              }} numberOfLines={3}>
                 {event.funFact}
               </Text>
             </View>
@@ -302,35 +297,34 @@ const EventCard = ({ event, savedEvents, setSavedEvents }: {
             {/* Impact */}
             <View style={{
               backgroundColor: 'rgba(16, 185, 129, 0.9)',
-              padding: 14,
+              padding: 12,
               borderRadius: 16,
-              marginBottom: 20,
               shadowColor: '#000',
               shadowOffset: { width: 0, height: 4 },
               shadowOpacity: 0.3,
               shadowRadius: 8,
             }}>
               <Text style={{
-                fontSize: 13,
+                fontSize: 12,
                 color: 'white',
                 fontWeight: '700',
-                marginBottom: 6,
+                marginBottom: 4,
                 ...noSelectStyle,
               }}>
                 🌍 Historical Impact
               </Text>
               <Text style={{
-                fontSize: 14,
+                fontSize: 13,
                 color: 'white',
-                lineHeight: 20,
+                lineHeight: 18,
                 fontWeight: '400',
                 ...noSelectStyle,
-              }}>
+              }} numberOfLines={3}>
                 {event.impact}
               </Text>
             </View>
           </View>
-        </ScrollView>
+        </View>
 
         {/* Action Buttons - Right Side */}
         <View style={{
@@ -505,7 +499,7 @@ const HomeFeed = ({ savedEvents, setSavedEvents }: { savedEvents: Set<number>, s
   }
 
   return (
-    <View style={{ flex: 1, backgroundColor: '#000' }}>
+    <View style={{ flex: 1, backgroundColor: '#000', overflow: 'hidden' }}>
       <StatusBar barStyle="light-content" backgroundColor="transparent" translucent />
       
       <View style={{ flex: 1, overflow: 'hidden' }} {...panResponder.panHandlers}>
