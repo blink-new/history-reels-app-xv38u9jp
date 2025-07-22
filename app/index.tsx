@@ -11,9 +11,9 @@ import {
   ScrollView,
   Platform,
   ActivityIndicator,
-  FlatList,
+  PanResponder,
+  Animated,
 } from 'react-native';
-// Removed gesture handler imports for now to fix blank screen issue
 
 const { height: SCREEN_HEIGHT, width: SCREEN_WIDTH } = Dimensions.get('window');
 
@@ -385,11 +385,13 @@ const EventCard = ({ event, savedEvents, setSavedEvents }: {
   );
 };
 
-// Home Feed Component - SIMPLE FLATLIST WITH PROPER SNAP BEHAVIOR
+// Home Feed Component - CUSTOM SWIPE IMPLEMENTATION FOR PERFECT ONE-CARD-PER-SWIPE
 const HomeFeed = ({ savedEvents, setSavedEvents }: { savedEvents: Set<number>, setSavedEvents: (events: Set<number>) => void }) => {
   const [events, setEvents] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [currentIndex, setCurrentIndex] = useState(0);
+  const translateY = useRef(new Animated.Value(0)).current;
+  const isAnimating = useRef(false);
 
   // Load initial events
   useEffect(() => {
@@ -427,11 +429,56 @@ const HomeFeed = ({ savedEvents, setSavedEvents }: { savedEvents: Set<number>, s
     }
   }, [currentIndex, events.length]);
 
-  const handleScroll = (event: any) => {
-    const offsetY = event.nativeEvent.contentOffset.y;
-    const index = Math.round(offsetY / SCREEN_HEIGHT);
-    setCurrentIndex(index);
-  };
+  // Custom pan responder for perfect swipe control
+  const panResponder = PanResponder.create({
+    onMoveShouldSetPanResponder: (evt, gestureState) => {
+      // Only respond to vertical gestures
+      return Math.abs(gestureState.dy) > Math.abs(gestureState.dx) && Math.abs(gestureState.dy) > 10;
+    },
+    onPanResponderGrant: () => {
+      // Set the offset to the current value when gesture starts
+      translateY.setOffset(translateY._value);
+    },
+    onPanResponderMove: (evt, gestureState) => {
+      if (isAnimating.current) return;
+      
+      // Update the animated value based on gesture
+      translateY.setValue(gestureState.dy);
+    },
+    onPanResponderRelease: (evt, gestureState) => {
+      if (isAnimating.current) return;
+      
+      translateY.flattenOffset();
+      
+      const threshold = SCREEN_HEIGHT * 0.25; // 25% of screen height
+      const velocity = gestureState.vy;
+      
+      let newIndex = currentIndex;
+      
+      // Determine direction based on gesture distance and velocity
+      if (gestureState.dy < -threshold || velocity < -0.5) {
+        // Swipe up - next card
+        newIndex = Math.min(currentIndex + 1, events.length - 1);
+      } else if (gestureState.dy > threshold || velocity > 0.5) {
+        // Swipe down - previous card
+        newIndex = Math.max(currentIndex - 1, 0);
+      }
+      
+      // Animate to the target position
+      const targetY = -newIndex * SCREEN_HEIGHT;
+      isAnimating.current = true;
+      
+      Animated.spring(translateY, {
+        toValue: targetY,
+        useNativeDriver: true,
+        tension: 100,
+        friction: 8,
+      }).start(() => {
+        isAnimating.current = false;
+        setCurrentIndex(newIndex);
+      });
+    },
+  });
 
   if (loading) {
     return (
@@ -461,33 +508,30 @@ const HomeFeed = ({ savedEvents, setSavedEvents }: { savedEvents: Set<number>, s
     <View style={{ flex: 1, backgroundColor: '#000' }}>
       <StatusBar barStyle="light-content" backgroundColor="transparent" translucent />
       
-      <FlatList
-        data={events}
-        keyExtractor={(item) => item.id.toString()}
-        renderItem={({ item }) => (
-          <EventCard 
-            event={item} 
-            savedEvents={savedEvents} 
-            setSavedEvents={setSavedEvents} 
-          />
-        )}
-        pagingEnabled={true}
-        showsVerticalScrollIndicator={false}
-        snapToInterval={SCREEN_HEIGHT}
-        snapToAlignment="start"
-        decelerationRate="fast"
-        bounces={false}
-        onScroll={handleScroll}
-        scrollEventThrottle={16}
-        getItemLayout={(data, index) => ({
-          length: SCREEN_HEIGHT,
-          offset: SCREEN_HEIGHT * index,
-          index,
-        })}
-        removeClippedSubviews={false}
-        disableIntervalMomentum={true}
-        style={{ flex: 1 }}
-      />
+      <View style={{ flex: 1, overflow: 'hidden' }} {...panResponder.panHandlers}>
+        <Animated.View
+          style={{
+            flex: 1,
+            transform: [{ translateY }],
+          }}
+        >
+          {events.map((event, index) => (
+            <View key={event.id} style={{ 
+              position: 'absolute',
+              top: index * SCREEN_HEIGHT,
+              left: 0,
+              right: 0,
+              height: SCREEN_HEIGHT,
+            }}>
+              <EventCard 
+                event={event} 
+                savedEvents={savedEvents} 
+                setSavedEvents={setSavedEvents} 
+              />
+            </View>
+          ))}
+        </Animated.View>
+      </View>
     </View>
   );
 };
@@ -559,12 +603,12 @@ const SavedEvents = ({ savedEvents, allEvents }: { savedEvents: Set<number>, all
           </Text>
         </View>
       ) : (
-        <FlatList
-          data={savedEventsList}
-          keyExtractor={(item) => item.id.toString()}
+        <ScrollView
           contentContainerStyle={{ paddingBottom: 100 }}
-          renderItem={({ item }) => (
-            <View style={{
+          showsVerticalScrollIndicator={false}
+        >
+          {savedEventsList.map((item) => (
+            <View key={item.id} style={{
               marginHorizontal: 24,
               marginVertical: 12,
               borderRadius: 16,
@@ -658,8 +702,8 @@ const SavedEvents = ({ savedEvents, allEvents }: { savedEvents: Set<number>, all
                 </View>
               </View>
             </View>
-          )}
-        />
+          ))}
+        </ScrollView>
       )}
     </View>
   );
